@@ -1,0 +1,15 @@
+[Unit]
+Description=Zookeeper
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+ExecStart={{ kafka_dir }}/bin/zookeeper-server-start.sh {{ kafka_dir }}/config/zookeeper.properties
+ExecStop={{ kafka_dir }}/bin/zookeeper-server-stop.sh
+StandardOutput=file:{{ home_dir }}/zookeeper.stdout.log
+StandardError=file:{{ home_dir }}/zookeeper.stderr.log
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1 @@
+frontend_log_dir: "{{ home_dir }}/frontend_logs"

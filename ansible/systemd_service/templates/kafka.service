@@ -1,0 +1,15 @@
+[Unit]
+Description=Kafka broker
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+ExecStart={{ kafka_dir }}/bin/kafka-server-start.sh {{ kafka_dir }}/config/server.properties
+ExecStop={{ kafka_dir }}/bin/kafka-server-stop.sh
+StandardOutput=file:{{ home_dir }}/kafka.stdout.log
+StandardError=file:{{ home_dir }}/kafka.stderr.log
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

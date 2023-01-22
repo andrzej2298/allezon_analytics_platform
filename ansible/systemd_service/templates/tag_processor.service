@@ -1,0 +1,14 @@
+[Unit]
+Description=Allezon tag processor
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+ExecStart={{ maven }} exec:java -Dexec.mainClass=main.java.allezon.Pipe -f {{ home_dir }}/processor/pom.xml
+StandardOutput=file:{{ home_dir }}/tag_processor.stdout.log
+StandardError=file:{{ home_dir }}/tag_processor.stderr.log
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

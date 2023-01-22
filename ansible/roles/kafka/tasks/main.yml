@@ -1,0 +1,88 @@
+- name: install java 17
+  become: true
+  apt:
+    name: openjdk-17-jre-headless
+    state: present
+
+- name: download kafka
+  get_url:
+    url: https://dlcdn.apache.org/kafka/3.1.0/kafka_2.13-3.1.0.tgz
+    dest: "{{ home_dir }}/kafka.tgz"
+
+- name: unpack
+  unarchive:
+    src: "{{ home_dir }}/kafka.tgz"
+    dest: "{{ home_dir }}"
+    remote_src: true
+  register: unpack_step
+
+- name: generate config
+  template:
+    src: server.properties.jinja
+    dest: "{{ kafka_dir }}/config/server.properties"
+
+- name: create kafka service
+  import_role:
+    name: systemd_service
+  vars:
+    service_config_file: "kafka.service"
+
+- name: create zookeeper service
+  import_role:
+    name: systemd_service
+  vars:
+    service_config_file: "zookeeper.service"
+
+- name: clear old logs
+  file:
+    path: "{{ home_dir }}/{{ item }}"
+    state: absent
+  loop:
+    - kafka.stderr.log
+    - kafka.stdout.log
+    - zookeeper.stderr.log
+    - zookeeper.stdout.log
+
+- name: stop modules
+  systemd:
+    name: "{{ item }}"
+    scope: user
+    state: stopped
+    daemon_reload: true
+    enabled: true
+  loop:
+    - zookeeper
+    - kafka
+
+- name: start services
+  systemd:
+    name: zookeeper
+    scope: user
+    state: started
+    daemon_reload: true
+    enabled: true
+
+- name: wait until zookeeper initializes 
+  pause:
+    seconds: 5
+
+- name: start services
+  systemd:
+    name: kafka
+    scope: user
+    state: started
+    daemon_reload: true
+    enabled: true
+
+- name: delete input topic
+  shell:
+    cmd: "./bin/kafka-topics.sh --bootstrap-server 10.112.128.104:9092 --delete --topic mimuw"
+    chdir: "{{ kafka_dir }}"
+  run_once: true
+  ignore_errors: true
+
+- name: create input topic
+  shell:
+    cmd: "./bin/kafka-topics.sh --bootstrap-server 10.112.128.104:9092 --create --topic mimuw"
+    chdir: "{{ kafka_dir }}"
+  run_once: true

@@ -1,0 +1,33 @@
+- name: copy dockerfile
+  copy:
+    src: ./Dockerfile
+    dest: "{{ home_dir }}"
+  register: dockerfile_task
+
+- name: copy haproxy config
+  copy:
+    src: ./haproxy.cfg
+    dest: "{{ home_dir }}"
+  register: config_task
+
+- name: build container
+  docker_image:
+    name: load_balancer
+    build:
+      path: "{{ home_dir }}"
+      pull: false
+    source: build
+    state: present
+    force_source: true
+  when: dockerfile_task.changed or config_task.changed or (force_build is defined and force_build)
+
+- name: run container
+  docker_container:
+    name: load_balancer
+    image: load_balancer
+    network_mode: host
+    restart: true
+    recreate: true
+    state: started
+  tags:
+    - deploy

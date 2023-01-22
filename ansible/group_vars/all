@@ -1,0 +1,10 @@
+username: "st128"
+home_dir: "/home/{{ username }}"
+database_ips:
+  - 10.112.128.106
+  - 10.112.128.107
+  - 10.112.128.108
+  - 10.112.128.109
+  - 10.112.128.110
+maven_version:  "3.8.6"
+maven: "{{ home_dir }}/apache-maven-{{ maven_version }}/bin/mvn"

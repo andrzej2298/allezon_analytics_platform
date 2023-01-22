@@ -1,0 +1,53 @@
+- hosts: ssh
+  roles:
+    - ssh
+  tags:
+    - ssh
+
+- hosts: java
+  roles:
+    - java
+  tags:
+    - java
+
+- hosts: docker
+  roles:
+    - docker
+  tags:
+    - docker
+
+- hosts: frontend
+  roles:
+    - frontend
+  tags:
+    - frontend
+
+- hosts: load_balancer
+  roles:
+    - load_balancer
+  tags:
+    - load_balancer
+
+- hosts: database
+  roles:
+    - database
+  tags:
+    - database
+
+- hosts: kafka
+  roles:
+    - kafka
+  tags:
+    - kafka
+
+- hosts: processor
+  roles:
+    - processor
+  tags:
+    - processor
+
+- hosts: ssh
+  roles:
+    - clean
+  tags:
+    - clean

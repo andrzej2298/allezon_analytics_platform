@@ -1,0 +1,56 @@
+- name: download package
+  get_url:
+    url: https://download.aerospike.com/download/server/latest/artifact/ubuntu20
+    dest: "{{ home_dir }}/aerospike.tgz"
+
+- name: unpack
+  unarchive:
+    src: "{{ home_dir }}/aerospike.tgz"
+    dest: "{{ home_dir }}"
+    remote_src: true
+
+- name: install
+  shell: ./asinstall
+  args:
+    chdir: aerospike-server-community-6.0.0.4-ubuntu20.04/
+  become: true
+
+- name: create log dir
+  file:
+    path: /var/log/aerospike
+    state: directory
+  become: true
+
+- name: generate config
+  template:
+    src: aerospike.conf.jinja
+    dest: /etc/aerospike/aerospike.conf
+  become: true
+
+- name: clean up database
+  file:
+    path: "{{ item }}"
+    state: absent
+  become: true
+  loop:
+    - /opt/aerospike/data/mimuw1.dat
+    - /opt/aerospike/data/mimuw2.dat
+    - /opt/aerospike/data/mimuw3.dat
+    - /opt/aerospike/data/mimuw4.dat
+
+- name: enable service
+  systemd:
+    name: aerospike
+    state: restarted
+    enabled: true
+  become: true
+
+- name: wait until database initializes 
+  pause:
+    seconds: 10
+
+- name: clean database
+  shell: aql -c "truncate mimuw"
+  run_once: true
+  tags:
+    - deploy

@@ -1,0 +1,49 @@
+- name: copy processor code
+  synchronize:
+    src: "{{ home_dir }}/allezon_analytics_platform/processor"
+    dest: "{{ home_dir }}"
+  tags:
+    - compile
+
+- name: compile
+  shell:
+    cmd: "{{ maven }} clean install"
+    chdir: "{{ home_dir }}/processor"
+  tags:
+    - compile
+
+- name: create service
+  import_role:
+    name: systemd_service
+  vars:
+    service_config_file: "tag_processor.service"
+
+- name: stop module
+  systemd:
+    name: tag_processor
+    scope: user
+    state: stopped
+    daemon_reload: true
+    enabled: true
+
+- name: clear old logs
+  file:
+    path: "{{ home_dir }}/tag_processor.stderr.log"
+    state: absent
+
+- name: clear old logs
+  file:
+    path: "{{ home_dir }}/tag_processor.stdout.log"
+    state: absent
+
+- name: wait until kafka initializes 
+  pause:
+    seconds: 5
+
+- name: start module
+  systemd:
+    name: tag_processor
+    scope: user
+    state: started
+    daemon_reload: true
+    enabled: true

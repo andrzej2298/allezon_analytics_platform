@@ -1,0 +1,28 @@
+- name: install pip and docker
+  apt:
+    name:
+      - python3-pip
+      - docker.io
+  become: true
+
+- name: install docker package
+  pip:
+    name:
+      - docker
+
+- name: create docker group
+  group:
+    name: docker
+    state: present
+  become: true
+
+- name: add user to docker group
+  user:
+    name: "{{ username }}"
+    groups: docker
+    append: true
+  become: true
+
+- name: reset ssh connection for group changes to take effect
+  meta:
+    reset_connection

@@ -1,0 +1,15 @@
+- name: install java 17
+  become: true
+  apt:
+    name: openjdk-17-jre-headless
+    state: present
+
+- name: install maven
+  get_url:
+    url: https://dlcdn.apache.org/maven/maven-3/{{ maven_version }}/binaries/apache-maven-{{ maven_version }}-bin.tar.gz
+    dest: "{{ home_dir }}/apache-maven-{{ maven_version }}-bin.tar.gz"
+
+- name: unpack maven
+  unarchive:
+    src: "{{ home_dir }}/apache-maven-{{ maven_version }}-bin.tar.gz"
+    dest: "{{ home_dir }}"

@@ -1,0 +1,34 @@
+- name: copy frontend code
+  synchronize:
+    src: "{{ home_dir }}/allezon_analytics_platform"
+    dest: "{{ home_dir }}"
+  tags:
+    - compile
+
+- name: build docker image
+  shell: "{{ maven }} package"
+  args:
+    chdir: "{{ home_dir }}/allezon_analytics_platform/frontend"
+  tags:
+    - compile
+
+- name: clean up container
+  docker_container:
+    name: frontend
+    state: absent
+
+- name: clean up volumes
+  docker_volume:
+    name: frontend-logs
+    state: absent
+
+- name: run container
+  docker_container:
+    name: frontend
+    image: frontend
+    network_mode: host
+    restart: true
+    volumes:
+      - "frontend-logs:/tmp"
+  tags:
+    - deploy

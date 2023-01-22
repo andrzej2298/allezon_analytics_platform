@@ -1,0 +1,13 @@
+- name: create config dir
+  file:
+    path: "{{ home_dir }}/.config/systemd/user/"
+    state: directory
+    recurse: true
+
+- name: generate systemd config
+  template:
+    src: "{{ service_config_file }}"
+    dest: "{{ home_dir }}/.config/systemd/user/{{ service_config_file }}"
+
+- name: enable linger
+  shell: loginctl enable-linger st128

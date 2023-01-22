@@ -1,0 +1,14 @@
+- name: create ssh key
+  openssh_keypair:
+    path: "{{ home_dir }}/.ssh/id_rsa"
+  delegate_to: localhost
+
+- name: copy key
+  copy:
+    src: "{{ home_dir }}/.ssh/id_rsa.pub"
+    dest: "{{ home_dir }}/.ssh/id_rsa.pub"
+
+- name: authorize ssh key
+  authorized_key:
+    user: "st128"
+    key: "{{ lookup('file', '{{ home_dir }}/.ssh/id_rsa.pub') }}"
